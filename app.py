@@ -43,26 +43,26 @@ def retrieve_info(query):
 llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0125")
 
 template = """
-You are a data platform migration consultant whose job is to convert Greenplum SQL code/script to Snowflake SQL code/script.
-I will share a SQL code which is a DDL or a Stored Procedure of the existing data platform which is Greenplum for now your Organization will be using this to migrate and build the same structure and architecture in this new platform with you and you will give me the best practice SQL code for the same in Snowflake.
-I should deploy this on the Snowflake database based on past best practices, 
+You are a data platform migration consulatant who's job is to convert greenplumn SQL code/script to Snowflake SQL code/script.
+I will share a SQL code which is a DDL or a Stored Procedure of the existing data platform which is Greenplum for now your Organization will be using this to migrate and build the same structure and architecture in this new platform with you and you will give me the best practice SQL code fro the same in Snowflake.
+I should deploy this on the snowflake database based on past best practices, 
 and you will follow ALL of the rules below:
 
 1/ Response should be a SQL code/script and STRICTLY nothing else. Not even a tag or word saying "SQL" or "code" or "script". Comments inside the SQL code are allowed.
 
-2/ If the best practices are irrelevant, then try to adhere to the knowledge of the best practices to convert the code
+2/ If the best practices are irrelevant, then try to adhere the knowledge of the best practices to convert the code
 
-Below is a type of code I received in the past from the existing data platform:
+Below is a type of code I received in the past from the existing data platform :
 {message}
 
 Here is a list of best practices of how we manually convert the code to Snowflake:
 {best_practice}
 
-Please write the best response that I should deploy this without any errors on the Snowflake database:
+Please write the best response that I should deploy this without any errors on the snowflake database:
 """
 
 prompt = PromptTemplate(
-    input_variables=["message", "best_practice"],
+    input_variables=["message","best_practice"],
     template=template
 )
 
@@ -74,48 +74,13 @@ def generate_response(message):
     response = chain.run(message=message, best_practice=best_practice)
     return response
 
-def on_submit(message):
-    if message:
-        st.write("Generating best practice snowflake :snowflake: conversion...")
-
-        result = generate_response(message)
-
-        st.info(result)
-
-
 # 6. Streamlit App
 def main():
     st.set_page_config(
         page_title="Migration Model", page_icon=":classical_building:")
 
     st.header("Migration Model - Altria :classical_building::sparkles:")
-
     message = st.text_area("greenplum code")
-
-    # Add empty space before buttons
-    st.write("")
-    
-    # Add square buttons
-    text1, text2, col1, col2, col3, col4, col5, col6 = st.columns([1, 0.7, 0.15, 0.15, 0.15, 0.15, 0.15, 0.4])
-    with text1:
-        st.write("")
-    with text2:
-        st.write("Example codes :point_right:")
-    with col1:
-        st.button("1", key="btn1")
-    with col2:
-        st.button("2", key="btn2")
-    with col3:
-        st.button("3", key="btn3")
-    with col4:
-        st.button("4", key="btn4")
-    with col5:
-        st.button("5", key="btn5")
-    with col6:
-        st.button("enter", key="submit", type="primary", on_click=on_submit(message))
-
-    # Add empty space after buttons
-    st.write("")
 
     if message:
         st.write("Generating best practice snowflake :snowflake: conversion...")
