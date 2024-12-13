@@ -78,12 +78,25 @@ def on_submit():
     st.session_state["show_loading"] = True
     st.session_state["show_result"] = False
 
+def return_example(idx):
+    examples = {
+        1: "CREATE TABLE subscribers (subscriber_id SERIAL PRIMARY KEY, subscriber_name TEXT, subscription_plan TEXT CHECK (subscription_plan IN ('basic', 'premium', 'enterprise')), subscription_start DATE DEFAULT CURRENT_DATE, subscription_end DATE) DISTRIBUTED BY (subscriber_id);",
+        2: "CREATE TABLE billing (bill_id SERIAL PRIMARY KEY, subscriber_id INT, billing_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, total_amount NUMERIC CHECK (total_amount >= 0)) PARTITION BY RANGE (billing_date) (START ('2023-01-01') END ('2024-01-01') EVERY ('1 MONTH')) DISTRIBUTED BY (bill_id);",
+        3: "CREATE EXTERNAL TABLE sms_logs (message_id INT, sender_number TEXT, receiver_number TEXT, timestamp TIMESTAMP, message_status TEXT CHECK (message_status IN ('sent', 'failed'))) LOCATION ('s3://telecom-dw/sms_logs/') FORMAT 'CSV' LOG ERRORS;",
+        4: "CREATE TABLE network_events (event_id SERIAL PRIMARY KEY, event_type TEXT CHECK (event_type IN ('outage', 'maintenance', 'upgrade')), region TEXT, event_start TIMESTAMP NOT NULL, event_end TIMESTAMP, duration INTERVAL GENERATED ALWAYS AS (event_end - event_start)) DISTRIBUTED BY (region);",
+        5: "CREATE OR REPLACE FUNCTION add_transaction(p_customer_id INT, p_transaction_amount NUMERIC, p_payment_method TEXT, p_transaction_status TEXT, p_discount_applied BOOLEAN DEFAULT FALSE) RETURNS VOID AS $$BEGIN INSERT INTO customer_transactions(customer_id, transaction_date, transaction_amount, payment_method, transaction_status, discount_applied) VALUES(p_customer_id, CURRENT_TIMESTAMP, p_transaction_amount, p_payment_method, p_transaction_status, p_discount_applied);END;$$ LANGUAGE plpgsql;"
+    }
+    st.session_state["message"] = examples.get(idx, "")
+
 # 6. Streamlit App
 def main():
     st.set_page_config(
         page_title="Migration Model", page_icon=":classical_building:")
 
     st.header("Migration Model - Altria :classical_building::sparkles:")
+
+    if "message" not in st.session_state:
+        st.session_state["message"] = ""
 
     message = st.text_area("greenplum code", key="message")
 
@@ -97,30 +110,22 @@ def main():
     with text2:
         st.write("Example codes :point_right:")
     with col1:
-        st.button("1", key="btn1")
+        st.button("1", key="btn1", on_click=lambda: return_example(1))
     with col2:
-        st.button("2", key="btn2")
+        st.button("2", key="btn2", on_click=lambda: return_example(2))
     with col3:
-        st.button("3", key="btn3")
+        st.button("3", key="btn3", on_click=lambda: return_example(3))
     with col4:
-        st.button("4", key="btn4")
+        st.button("4", key="btn4", on_click=lambda: return_example(4))
     with col5:
-        st.button("5", key="btn5")
+        st.button("5", key="btn5", on_click=lambda: return_example(5))
     with col6:
         st.button("Enter", key="submit", type="primary", on_click=on_submit)
 
     # Add empty space after buttons
     st.write("")
 
-    if message:
-        on_submit()
-
-    # Display result if available
-    if "show_result" not in st.session_state or "show_loading" not in st.session_state:
-        st.session_state["show_loading"] = False
-        st.session_state["show_result"] = False
-
-    if st.session_state["show_loading"]:
+    if st.session_state["message"] and st.session_state["show_loading"]:
         st.write("Generating best practice snowflake :snowflake: conversion...")
         message = st.session_state["message"]
         if message:
@@ -128,6 +133,11 @@ def main():
             st.session_state["result"] = result
             st.session_state["show_result"] = True
             st.session_state["show_loading"] = False
+
+    # Display result if available
+    if "show_result" not in st.session_state or "show_loading" not in st.session_state:
+        st.session_state["show_loading"] = False
+        st.session_state["show_result"] = False
 
     if st.session_state["show_result"]:
         st.info(st.session_state["result"])

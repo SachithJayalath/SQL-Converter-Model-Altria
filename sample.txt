@@ -14,3 +14,9 @@ Here is a list of best practices of how we manually convert the code to Snowflak
 {best_practice}
 
 Please write the best response that I should deploy this without any errors on the snowflake database:
+
+1: "CREATE TABLE subscribers (subscriber_id SERIAL PRIMARY KEY, subscriber_name TEXT, subscription_plan TEXT CHECK (subscription_plan IN ('basic', 'premium', 'enterprise')), subscription_start DATE DEFAULT CURRENT_DATE, subscription_end DATE) DISTRIBUTED BY (subscriber_id);",
+2: "CREATE TABLE billing (bill_id SERIAL PRIMARY KEY, subscriber_id INT, billing_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, total_amount NUMERIC CHECK (total_amount >= 0)) PARTITION BY RANGE (billing_date) (START ('2023-01-01') END ('2024-01-01') EVERY ('1 MONTH')) DISTRIBUTED BY (bill_id);",
+3: "CREATE EXTERNAL TABLE sms_logs (message_id INT, sender_number TEXT, receiver_number TEXT, timestamp TIMESTAMP, message_status TEXT CHECK (message_status IN ('sent', 'failed'))) LOCATION ('s3://telecom-dw/sms_logs/') FORMAT 'CSV' LOG ERRORS;",
+4: "CREATE TABLE network_events (event_id SERIAL PRIMARY KEY, event_type TEXT CHECK (event_type IN ('outage', 'maintenance', 'upgrade')), region TEXT, event_start TIMESTAMP NOT NULL, event_end TIMESTAMP, duration INTERVAL GENERATED ALWAYS AS (event_end - event_start)) DISTRIBUTED BY (region);",
+5: "CREATE OR REPLACE FUNCTION add_transaction(p_customer_id INT, p_transaction_amount NUMERIC, p_payment_method TEXT, p_transaction_status TEXT, p_discount_applied BOOLEAN DEFAULT FALSE) RETURNS VOID AS $$BEGIN INSERT INTO customer_transactions(customer_id, transaction_date, transaction_amount, payment_method, transaction_status, discount_applied) VALUES(p_customer_id, CURRENT_TIMESTAMP, p_transaction_amount, p_payment_method, p_transaction_status, p_discount_applied);END;$$ LANGUAGE plpgsql;"
