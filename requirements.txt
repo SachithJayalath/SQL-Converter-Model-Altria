@@ -5,5 +5,4 @@ faiss-cpu
 openai
 python-dotenv
 streamlit
-titoken
 jq
