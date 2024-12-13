@@ -1,0 +1,112 @@
+[
+    {
+        "topic": "Data Types",
+        "greenplum": "Many of the data types used in Greenplum SQL will map directly to Snowflake data types. However, there are some differences that need to be addressed:\n• Greenplum `SERIAL` → Snowflake `AUTOINCREMENT`\n• Greenplum `BYTEA` → Snowflake `BINARY`\n• Greenplum `TEXT` → Snowflake `VARCHAR`\n• Greenplum `TIMESTAMP WITHOUT TIME ZONE` → Snowflake `TIMESTAMP_NTZ`\n• Greenplum `TIMESTAMP WITH TIME ZONE` → Snowflake `TIMESTAMP_TZ`",
+        "snowflake": "Many of the data types used in Greenplum SQL will map directly to Snowflake data types. However, there are some differences that need to be addressed:\n• Greenplum `SERIAL` → Snowflake `AUTOINCREMENT`\n• Greenplum `BYTEA` → Snowflake `BINARY`\n• Greenplum `TEXT` → Snowflake `VARCHAR`\n• Greenplum `TIMESTAMP WITHOUT TIME ZONE` → Snowflake `TIMESTAMP_NTZ`\n• Greenplum `TIMESTAMP WITH TIME ZONE` → Snowflake `TIMESTAMP_TZ`"
+    },
+    {
+        "topic": "Stored Procedure Syntax",
+        "greenplum": "Greenplum SQL stored procedures are typically written using PL/pgSQL.\n\nCREATE OR REPLACE FUNCTION my_function(param1 INT, param2 VARCHAR)\nRETURNS TABLE (col1 INT, col2 VARCHAR) AS $$\nBEGIN\n    RETURN QUERY\n    SELECT col1, col2\n    FROM some_table\n    WHERE col1 = param1 AND col2 = param2;\nEND;\n$$ LANGUAGE plpgsql;",
+        "snowflake": "Snowflake uses JavaScript for procedural logic.\n\nCREATE OR REPLACE PROCEDURE my_function(param1 INT, param2 STRING)\nRETURNS TABLE (col1 INT, col2 STRING)\nLANGUAGE JAVASCRIPT\nAS\n$$\n    var result = snowflake.createStatement({\n        sqlText: `SELECT col1, col2 FROM some_table WHERE col1 = :1 AND col2 = :2`,\n        binds: [param1, param2]\n    }).execute();\n    return result;\n$$;"
+    },
+    {
+        "topic": "Error Handling",
+        "greenplum": "Greenplum uses PL/pgSQL’s `EXCEPTION` blocks.\n\nBEGIN\n    -- some code\nEXCEPTION\n    WHEN others THEN\n        RAISE EXCEPTION 'An error occurred!';\nEND;",
+        "snowflake": "Snowflake uses JavaScript `try...catch` blocks for exception handling.\n\ntry {\n    // some code\n} catch (err) {\n    throw \"An error occurred: \" + err;\n}"
+    },
+    {
+        "topic": "Loops and Control Structures",
+        "greenplum": "Greenplum’s PL/pgSQL control structures like `FOR`, `WHILE`, and `LOOP`.\n\nFOR rec IN SELECT * FROM some_table LOOP\n    -- some logic\nEND LOOP;",
+        "snowflake": "Snowflake uses JavaScript constructs for control structures.\n\nvar stmt = snowflake.createStatement({sqlText: `SELECT * FROM some_table`});\nvar result = stmt.execute();\nwhile (result.next()) {\n    // some logic\n}"
+    },
+    {
+        "topic": "Cursors and Record Handling",
+        "greenplum": "Greenplum often uses cursors for record-by-record processing.\n\nDECLARE my_cursor CURSOR FOR SELECT col1, col2 FROM some_table;\nFETCH NEXT FROM my_cursor INTO rec_col1, rec_col2;",
+        "snowflake": "Snowflake handles results using JavaScript constructs like the `ResultSet` object.\n\nvar stmt = snowflake.createStatement({sqlText: `SELECT col1, col2 FROM some_table`});\nvar result = stmt.execute();\nwhile (result.next()) {\n    var rec_col1 = result.getColumnValue(1);\n    var rec_col2 = result.getColumnValue(2);\n}"
+    },
+    {
+        "topic": "Dynamic SQL",
+        "greenplum": "Greenplum allows the construction and execution of dynamic SQL using `EXECUTE`.\n\nEXECUTE 'SELECT * FROM ' || table_name || ' WHERE col1 = ' || quote_literal(some_value);",
+        "snowflake": "In Snowflake, dynamic SQL is constructed using JavaScript string concatenation and executed through `snowflake.createStatement`.\n\nvar query = `SELECT * FROM ` + table_name + ` WHERE col1 = '` + some_value + `'`;\nvar stmt = snowflake.createStatement({sqlText: query});\nstmt.execute();"
+    },
+    {
+        "topic": "Conditional Statements",
+        "greenplum": "Greenplum uses `IF`, `CASE`, and other control-flow constructs.\n\nIF col1 = some_value THEN\n    RAISE NOTICE 'Condition met!';\nELSE\n    RAISE NOTICE 'Condition not met!';\nEND IF;",
+        "snowflake": "Snowflake uses JavaScript for control-flow within the procedure body.\n\nif (col1 == some_value) {\n    snowflake.createStatement({sqlText: `RAISE NOTICE 'Condition met!'`}).execute();\n} else {\n    snowflake.createStatement({sqlText: `RAISE NOTICE 'Condition not met!'`}).execute();\n}"
+    },
+    {
+        "topic": "Data Type Precision and Scale",
+        "greenplum": "Greenplum SQL and Snowflake have differences in how numeric types handle precision and scale.\n\nCREATE TABLE my_table (\n    my_number NUMERIC(10, 2)\n);",
+        "snowflake": "Snowflake handles numeric types with precision and scale similarly.\n\nCREATE TABLE my_table (\n    my_number NUMBER(10, 2)\n);"
+    },
+    {
+        "topic": "Transaction Management",
+        "greenplum": "Greenplum uses traditional SQL transaction control.\n\nBEGIN;\n-- some transactional operations\nCOMMIT;",
+        "snowflake": "Snowflake handles transactions differently.\n\nBEGIN TRANSACTION;\n-- some transactional operations\nCOMMIT;"
+    },
+    {
+        "topic": "User-Defined Types",
+        "greenplum": "User-defined types in Greenplum need to be carefully handled during the migration to Snowflake.\n\nCREATE TYPE my_type AS (field1 INT, field2 VARCHAR);",
+        "snowflake": "Snowflake supports a different set of user-defined types.\n\nCREATE OR REPLACE TYPE my_type AS OBJECT(field1 INT, field2 STRING);"
+    },
+    {
+        "topic": "Session Variables and Context",
+        "greenplum": "Session variables in Greenplum are accessed differently.\n\nSET my_variable = 'value';",
+        "snowflake": "Snowflake uses JavaScript for session variables.\n\nvar my_variable = 'value';"
+    },
+    {
+        "topic": "Temporary Tables",
+        "greenplum": "Temporary tables are created and managed differently in Greenplum.\n\nCREATE TEMP TABLE my_temp_table (col1 INT, col2 VARCHAR);",
+        "snowflake": "Snowflake uses a different syntax for temporary tables.\n\nCREATE TEMPORARY TABLE my_temp_table (col1 INT, col2 STRING);"
+    },
+    {
+        "topic": "Built-in Functions",
+        "greenplum": "Greenplum and Snowflake provide a variety of built-in functions, but some functions have different names or behavior.\n\nSELECT CURRENT_TIMESTAMP;",
+        "snowflake": "Snowflake uses different syntax for some built-in functions.\n\nSELECT CURRENT_TIMESTAMP();"
+    },
+    {
+        "topic": "Triggers",
+        "greenplum": "Greenplum supports triggers that execute automatically in response to certain events on a table.\n\nCREATE TRIGGER my_trigger\nAFTER INSERT ON my_table\nFOR EACH ROW EXECUTE FUNCTION my_function();",
+        "snowflake": "Snowflake does not support native triggers. Instead, you may need to rewrite logic using Tasks and Streams in Snowflake to track changes and trigger actions."
+    },
+    {
+        "topic": "Security and Permissions",
+        "greenplum": "Greenplum and Snowflake have different approaches to managing security, user roles, and permissions.\n\nGRANT SELECT ON my_table TO my_role;",
+        "snowflake": "Snowflake uses role-based access control.\n\nGRANT SELECT ON TABLE my_table TO ROLE my_role;"
+    },
+    {
+        "topic": "Performance Optimization Techniques",
+        "greenplum": "Greenplum may rely on indexes and query planning hints.\n\nCREATE INDEX idx_col1 ON my_table(col1);\nANALYZE my_table;",
+        "snowflake": "Snowflake handles performance optimizations differently, primarily through automatic clustering and scaling mechanisms.\n\nALTER TABLE my_table CLUSTER BY (col1);"
+    },
+    {
+        "topic": "Result Set Return Types",
+        "greenplum": "In Greenplum, functions and procedures can return a variety of result set formats.\n\nCREATE OR REPLACE FUNCTION my_function()\nRETURNS TABLE (col1 INT, col2 VARCHAR) AS $$\nBEGIN\n    RETURN QUERY SELECT col1, col2 FROM my_table;\nEND;\n$$ LANGUAGE plpgsql;",
+        "snowflake": "In Snowflake, the return type must be explicitly handled.\n\nCREATE OR REPLACE PROCEDURE my_function()\nRETURNS TABLE (col1 INT, col2 STRING)\nLANGUAGE JAVASCRIPT\nAS\n$$\n    var result = snowflake.createStatement({\n        sqlText: `SELECT col1, col2 FROM my_table`\n    }).execute();\n    return result;\n$$;"
+    },
+    {
+        "topic": "Integration with External Services",
+        "greenplum": "Greenplum may integrate with external services or APIs using extensions or external functions.\n\nCREATE EXTENSION postgres_fdw;\nIMPORT FOREIGN SCHEMA remote_schema FROM SERVER remote_server INTO local_schema;",
+        "snowflake": "Snowflake supports external functions using AWS Lambda or other services to call APIs.\n\nCREATE EXTERNAL FUNCTION my_function(input STRING)\nRETURNS STRING\nAPI_INTEGRATION = my_integration\nAS 'https://api.example.com/my_function';"
+    },
+    {
+        "topic": "Debugging and Logging",
+        "greenplum": "Debugging stored procedures in Greenplum is often done using RAISE NOTICE statements.\n\nRAISE NOTICE 'Debug: Value of var1 is %', var1;",
+        "snowflake": "Snowflake uses JavaScript's logging mechanisms.\n\nvar var1 = 'some_value';\nconsole.log('Debug: Value of var1 is ' + var1);"
+    },
+    {
+        "topic": "Data Import/Export",
+        "greenplum": "Greenplum uses the COPY command for loading and exporting data.\n\nCOPY my_table TO '/path/to/file.csv' WITH CSV HEADER;",
+        "snowflake": "Snowflake uses the COPY INTO command for data import/export.\n\nCOPY INTO @my_stage/my_file.csv FROM my_table\nFILE_FORMAT = (TYPE = CSV FIELD_OPTIONALLY_ENCLOSED_BY = '\"');"
+    },
+    {
+        "topic": "Recursive Queries",
+        "greenplum": "Recursive queries are common in Greenplum using WITH RECURSIVE.\n\nWITH RECURSIVE subordinates AS (\n    SELECT employee_id, manager_id\n    FROM employees\n    WHERE manager_id IS NULL\n    UNION ALL\n    SELECT e.employee_id, e.manager_id\n    FROM employees e\n    INNER JOIN subordinates s ON s.employee_id = e.manager_id\n)\nSELECT * FROM subordinates;",
+        "snowflake": "Snowflake also supports recursive queries.\n\nWITH RECURSIVE subordinates AS (\n    SELECT employee_id, manager_id\n    FROM employees\n    WHERE manager_id IS NULL\n    UNION ALL\n    SELECT e.employee_id, e.manager_id\n    FROM employees e\n    INNER JOIN subordinates s ON s.employee_id = e.manager_id\n)\nSELECT * FROM subordinates;"
+    },
+    {
+        "topic": "Array and Composite Types",
+        "greenplum": "Greenplum supports array and composite types directly.\n\nCREATE TABLE my_table (\n    id INT,\n    my_array INT[]\n);",
+        "snowflake": "Snowflake handles arrays using the ARRAY and OBJECT data types.\n\nCREATE TABLE my_table (\n    id INT,\n    my_array ARRAY\n);"
+    }
+]
