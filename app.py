@@ -87,6 +87,7 @@ def return_example(idx):
         5: "CREATE OR REPLACE FUNCTION add_transaction(p_customer_id INT, p_transaction_amount NUMERIC, p_payment_method TEXT, p_transaction_status TEXT, p_discount_applied BOOLEAN DEFAULT FALSE) RETURNS VOID AS $$BEGIN INSERT INTO customer_transactions(customer_id, transaction_date, transaction_amount, payment_method, transaction_status, discount_applied) VALUES(p_customer_id, CURRENT_TIMESTAMP, p_transaction_amount, p_payment_method, p_transaction_status, p_discount_applied);END;$$ LANGUAGE plpgsql;"
     }
     st.session_state["message"] = examples.get(idx, "")
+    st.session_state["show_result"] = False
 
 # 6. Streamlit App
 def main():
